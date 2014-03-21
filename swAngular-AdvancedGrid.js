@@ -1,3 +1,6 @@
+var scripts = document.getElementsByTagName("script");
+var currentScriptPath = scripts[scripts.length-1].src;
+
 angular.module('swAngularAdvancedGrid', [])
     .directive('swAngularAdvancedGrid', function () {
         return {
@@ -9,7 +12,7 @@ angular.module('swAngularAdvancedGrid', [])
                 metaData: '=?swMetaData',
                 options: '=swOptions'
             },
-            templateUrl: "directives/swAngular-AdvancedGrid/swAngular-AdvancedGrid.html",
+            templateUrl: currentScriptPath.substring(0, currentScriptPath.lastIndexOf('/') + 1) + "swAngular-AdvancedGrid.html",
             controller: function ($scope) {
                 $scope.handleButtonClick = function (callback, entry) {
                     if (typeof callback === 'function') {
