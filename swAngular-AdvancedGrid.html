@@ -1,0 +1,94 @@
+<div class="panel panel-default">
+    <div class="panel-heading" ng-show="showHeadingBar">
+        <div class="row">
+            <div class="col-md-8">{{options.heading}}</div>
+            <div class="col-md-3">
+                <span ng-show="options.showMetaData">{{options.snippets.showingItems}} {{metaData.offset}} - {{(metaData.offset > metaData.total) ? (metaData.offset + metaData.total) : (metaData.offset + metaData.limit)}} {{options.snippets.of || '/'}} {{metaData.total}}</span>
+            </div>
+            <div class="col-md-1">
+                <i class="glyphicon glyphicon-refresh" ng-show="options.showRefreshButton" ng-click="refresh()"></i>
+            </div>
+        </div>
+    </div>
+    <div class="panel-body">
+        <table class="table table-condensed table-hover table-striped">
+            <thead>
+            <tr>
+                <th ng-repeat="field in options.fields" width="{{field.weight}}%">
+                    <i class="glyphicon glyphicon-sort-by-alphabet" ng-show="field.order=='asc'"></i>
+                    <i class="glyphicon glyphicon-sort-by-alphabet-alt" ng-show="field.order=='desc'"></i>
+                    <a ng-click="changeOrder(field)">{{field.label}}:</a>
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="entry in list" ng-dblclick="enableLiveEditing(entry)">
+                <td ng-repeat="field in options.fields" >
+                    <div ng-if="!entry.liveEditingEnabled || !field.liveEditable">
+                        {{field.renderer(entry[field.column], entry)}}
+                    </div>
+                    <div ng-if="entry.liveEditingEnabled && field.liveEditable">
+                        <input type="{{field.liveEditType || guessLiveEditingType(entry[field.column])}}" ng-model="entry[field.column]"/>
+                    </div>
+                </td>
+                <td ng-repeat="button in options.buttons">
+                    <div ng-if="!button.button">
+                        <div ng-if="button.glyphicon.length>0">
+                            <a ng-click="handleButtonClick(button.onclick, entry)">
+                                <i class="glyphicon glyphicon-{{button.glyphicon}}" title="{{button.label}}"></i>
+                            </a>
+                        </div>
+                        <div ng-if="button.iconPath.length>0">
+                            <img ng-src="button.iconPath" alt="{{button.label}}"/>
+                        </div>
+                    </div>
+                    <button ng-if="button.button" ng-click="handleButtonClick(button.onclick, entry)">
+                        <i ng-if="button.glyphicon.length>0" class="glyphicon glyphicon-{{button.glyphicon}}"
+                           title="{{button.label}}"></i>
+                        <img ng-if="button.iconPath.length>0" ng-src="button.iconPath" alt="{{button.label}}"/>
+                        {{button.label}}
+                    </button>
+                </td>
+                <td ng-if="entry.liveEditingEnabled" no-wrap>
+                    <span class="glyphicon glyphicon-ok" ng-click="storeLiveEdit(entry)"></span>
+                    <span class="glyphicon glyphicon-remove" ng-click="discardLiveEdit(entry)"></span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="panel-footer" ng-show="showFooterBar">
+        <div class="row">
+            <div class="col-md-4">
+                <ul ng-show="options.showPagination" class="pagination pagination col"
+                    style="margin: 0px 0px; font-weight: bolder;">
+                    <li><a class="glyphicon glyphicon-step-backward" ng-click="setFirstPage()"> </a></li>
+                    <li><a class="glyphicon glyphicon-fast-backward" ng-click="setPreviousPage()"> </a></li>
+                    <li data-ng-repeat="page in pages">
+                        <a ng-hide="currentPage.label == page.label" ng-click="setPage(page)">{{page.label}}</a>
+                        <span ng-show="currentPage.label == page.label">{{page.label}}</span>
+                    </li>
+                    <li><a class="glyphicon glyphicon-fast-forward" ng-click="setNextPage()"> </a></li>
+                    <li><a class="glyphicon glyphicon-step-forward" ng-click="setLastPage()"> </a></li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <div ng-show="options.showItemsPerPage">
+                    <label for="ag_itemsperpage">{{options.snippets.itemsPerPage || 'Einträge je Seite:'}}</label>
+                    <input id="ag_itemsperpage" class="form-inline" type="number" ng-model="itemPerPageNumber"
+                           style="width: 50px;"/>
+                    <button ng-click="changeItemsPerPage(itemPerPageNumber)">{{options.snippets.buttonChangeItemsPerPage || 'Ok'}}</button>
+                </div>
+
+            </div>
+            <div class="col-md-4">
+                <div ng-show="options.showSearch">
+                    <label for="ag_search">{{options.snippets.search || 'Suche:'}}</label>
+                    <input type="text" class="form-inline" ng-model="searchQuery"/>
+                    <button ng-click="search(searchQuery)">{{options.snippets.buttonSearch || 'Ok'}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
