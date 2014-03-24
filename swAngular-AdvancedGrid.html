@@ -62,19 +62,31 @@
             <div class="col-md-4">
                 <ul ng-show="options.showPagination" class="pagination pagination col"
                     style="margin: 0px 0px; font-weight: bolder;">
-                    <li><a class="glyphicon glyphicon-step-backward" ng-click="setFirstPage()"> </a></li>
-                    <li><a class="glyphicon glyphicon-fast-backward" ng-click="setPreviousPage()"> </a></li>
+                    <li>
+                        <span ng-show="isOnFirstPage()" class="glyphicon glyphicon-step-backward"> </span>
+                        <a ng-show="!isOnFirstPage()" class="glyphicon glyphicon-step-backward" ng-click="setFirstPage()"> </a>
+                    </li>
+                    <li>
+                        <span ng-show="isOnFirstPage()" class="glyphicon glyphicon-fast-backward"> </span>
+                        <a ng-show="!isOnFirstPage()"class="glyphicon glyphicon-backward" ng-click="setPreviousPage()"> </a>
+                    </li>
                     <li data-ng-repeat="page in pages">
-                        <a ng-hide="currentPage.label == page.label" ng-click="setPage(page)">{{page.label}}</a>
+                        <a ng-show="currentPage.label != page.label" ng-click="setPage(page)">{{page.label}}</a>
                         <span ng-show="currentPage.label == page.label">{{page.label}}</span>
                     </li>
-                    <li><a class="glyphicon glyphicon-fast-forward" ng-click="setNextPage()"> </a></li>
-                    <li><a class="glyphicon glyphicon-step-forward" ng-click="setLastPage()"> </a></li>
+                    <li>
+                        <span ng-show="isOnLastPage()" class="glyphicon glyphicon-fast-forward" ng-click="setNextPage()"> </span>
+                        <a ng-show="!isOnLastPage()" class="glyphicon glyphicon-forward" ng-click="setNextPage()"> </a>
+                    </li>
+                    <li>
+                        <span ng-show="isOnLastPage()" class="glyphicon glyphicon-step-forward" ng-click="setNextPage()"> </span>
+                        <a ng-show="!isOnLastPage()" class="glyphicon glyphicon-step-forward" ng-click="setLastPage()"> </a>
+                    </li>
                 </ul>
             </div>
             <div class="col-md-4">
                 <div ng-show="options.showItemsPerPage">
-                    <label for="ag_itemsperpage">{{options.snippets.itemsPerPage || 'Einträge je Seite:'}}</label>
+                    <label for="ag_itemsperpage">{{options.snippets.itemsPerPage || 'Items per page:'}}</label>
                     <input id="ag_itemsperpage" class="form-inline" type="number" ng-model="itemPerPageNumber"
                            style="width: 50px;"/>
                     <button ng-click="changeItemsPerPage(itemPerPageNumber)">{{options.snippets.buttonChangeItemsPerPage || 'Ok'}}</button>
@@ -83,7 +95,7 @@
             </div>
             <div class="col-md-4">
                 <div ng-show="options.showSearch">
-                    <label for="ag_search">{{options.snippets.search || 'Suche:'}}</label>
+                    <label for="ag_search">{{options.snippets.search || 'Search:'}}</label>
                     <input type="text" class="form-inline" ng-model="searchQuery"/>
                     <button ng-click="search(searchQuery)">{{options.snippets.buttonSearch || 'Ok'}}</button>
                 </div>
