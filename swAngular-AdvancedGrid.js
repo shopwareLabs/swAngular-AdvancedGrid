@@ -6,6 +6,7 @@ angular.module('swAngularAdvancedGrid', [])
             transclude: false,
             scope: {
                 ngModel: '=',
+                metaData: '=?swMetaData',
                 options: '=swOptions'
             },
             templateUrl: "directives/swAngular-AdvancedGrid/swAngular-AdvancedGrid.html",
@@ -184,10 +185,8 @@ angular.module('swAngularAdvancedGrid', [])
                  */
                 if ($scope.ngModel.hasOwnProperty('metaData')) {
                     $scope.metaData = $scope.ngModel.metaData;
-
-
-                    $scope.itemPerPageNumber = $scope.metaData.limit;
                 }
+                $scope.itemPerPageNumber = $scope.metaData.limit || 0;
 
                 /**
                  * Prepare fields
