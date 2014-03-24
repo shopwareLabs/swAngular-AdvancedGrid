@@ -74,6 +74,7 @@ angular.module('swAngularAdvancedGrid', [])
                 };
 
                 $scope.setPage = function (page) {
+                    if($scope.metaData === undefined) return;
                     if (!$scope.options.hasOwnProperty('listeners')
                         || typeof $scope.options.listeners.onchangepage !== 'function')
                         return;
@@ -82,28 +83,35 @@ angular.module('swAngularAdvancedGrid', [])
                 };
 
                 $scope.setFirstPage = function () {
+                    if($scope.metaData === undefined) return;
                     $scope.options.listeners.onchangepage(0, $scope.metaData.limit);
                 };
                 $scope.setPreviousPage = function () {
+                    if($scope.metaData === undefined) return;
                     var currentOffset = $scope.currentPage.offset;
                     $scope.options.listeners.onchangepage(currentOffset - $scope.metaData.limit, $scope.metaData.limit);
 
                 };
                 $scope.setNextPage = function () {
+                    if($scope.metaData === undefined) return;
                     var currentOffset = $scope.currentPage.offset;
                     $scope.options.listeners.onchangepage(currentOffset + $scope.metaData.limit, $scope.metaData.limit);
 
                 };
                 $scope.setLastPage = function () {
+                    if($scope.metaData === undefined) return;
                     var numPages = Math.ceil($scope.metaData.total / $scope.metaData.limit);
                     $scope.options.listeners.onchangepage(numPages * $scope.metaData.limit - $scope.metaData.limit, $scope.metaData.limit);
                 };
 
                 $scope.isOnFirstPage = function () {
+                    if($scope.metaData === undefined) return;
                     return $scope.metaData.offset == 0;
                 };
 
                 $scope.isOnLastPage = function () {
+                    if($scope.metaData === undefined) return;
+
                     var numPages = Math.ceil($scope.metaData.total / $scope.metaData.limit);
                     return $scope.metaData.offset == numPages * $scope.metaData.limit - $scope.metaData.limit;
                 };
@@ -171,9 +179,6 @@ angular.module('swAngularAdvancedGrid', [])
                     throw new Error('Options are required!');
                 }
 
-                $scope.list = [];
-                $scope.metaData = {};
-
                 /**
                  * Extract list
                  */
@@ -189,6 +194,16 @@ angular.module('swAngularAdvancedGrid', [])
                 if ($scope.ngModel.hasOwnProperty('metaData')) {
                     $scope.metaData = $scope.ngModel.metaData;
                 }
+
+                if($scope.list === undefined) {
+                    throw new Error('No data provided');
+                }
+
+                if($scope.metaData === undefined) {
+                    throw new Error('No meta data provided');
+                }
+
+
                 $scope.itemPerPageNumber = $scope.metaData.limit || 0;
 
                 /**
@@ -214,11 +229,27 @@ angular.module('swAngularAdvancedGrid', [])
                  * Calculate pagination
                  */
                 $scope.currentPage = undefined;
-                $scope.$watch('metaData', function () {
+                $scope.$watch('metaData', function (newMetaData) {
+                    if(newMetaData === undefined) {
+                        throw new Error('Meta data undefined');
+                    }
+
+                    if(newMetaData.limit === undefined) {
+                        throw new Error('Meta data invalid: limit undefined');
+                    }
+
+                    if(newMetaData.offset === undefined) {
+                        throw new Error('Meta data invalid: offset undefined');
+                    }
+
+                    if(newMetaData.total === undefined) {
+                        throw new Error('Meta data invalid: total undefined');
+                    }
+
                     var paginationWidth = $scope.options.paginationWidth || 2;
-                    var limit = $scope.metaData.limit;
-                    var offset = $scope.metaData.offset;
-                    var total = $scope.metaData.total;
+                    var limit = newMetaData.limit;
+                    var offset = newMetaData.offset;
+                    var total = newMetaData.total;
 
                     $scope.pages = [];
                     if (!(isNaN(limit) || isNaN(offset) || isNaN(total))) {
@@ -230,7 +261,7 @@ angular.module('swAngularAdvancedGrid', [])
                         for (var i = startPage; i < Math.min(numPages, startPage + paginationWidth); i++) {
                             var newPage = {
                                 label: i + 1,
-                                offset: i * $scope.metaData.limit
+                                offset: i * limit
                             };
                             if (i === currentPageId) {
                                 $scope.currentPage = newPage;
