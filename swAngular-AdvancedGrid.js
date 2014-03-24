@@ -1,5 +1,5 @@
 var scripts = document.getElementsByTagName("script");
-var currentScriptPath = scripts[scripts.length-1].src;
+var currentScriptPath = scripts[scripts.length - 1].src;
 
 angular.module('swAngularAdvancedGrid', [])
     .directive('swAngularAdvancedGrid', function () {
@@ -13,6 +13,106 @@ angular.module('swAngularAdvancedGrid', [])
                 options: '=swOptions'
             },
             templateUrl: currentScriptPath.substring(0, currentScriptPath.lastIndexOf('/') + 1) + "swAngular-AdvancedGrid.html",
+            link: function ($scope) {
+                if (!$scope.hasOwnProperty('options')) {
+                    throw new Error('Options are required!');
+                }
+
+                /**
+                 * Prepare fields
+                 */
+                for (var fieldKey in $scope.options.fields) {
+                    $scope.options.fields.sorting = '';
+
+                    if (typeof $scope.options.fields[fieldKey].renderer !== 'function') {
+                        $scope.options.fields[fieldKey].renderer = function (input, row) {
+                            return input;
+                        }
+                    }
+                }
+
+                /**
+                 * Enable eiew-elements
+                 */
+                $scope.showHeadingBar = $scope.options.heading || $scope.showMetaData || $scope.showRefreshButton;
+                $scope.showFooterBar = $scope.options.showPagination || $scope.options.showItemsPerPage || $scope.options.showSearch;
+
+                /**
+                 * Calculate pagination
+                 */
+                $scope.currentPage = undefined;
+
+                $scope.$watch('ngModel', function () {
+                    /**
+                     * Extract list
+                     */
+                    if ($scope.ngModel.hasOwnProperty('data')) {
+                        $scope.list = $scope.ngModel.data;
+                    } else {
+                        $scope.list = $scope.ngModel;
+                    }
+
+                    /**
+                     * Extract meta data
+                     */
+                    if ($scope.ngModel.hasOwnProperty('metaData')) {
+                        $scope.metaData = $scope.ngModel.metaData;
+                    }
+
+                    if ($scope.list === undefined) {
+                        throw new Error('No data provided');
+                    }
+
+                    if ($scope.metaData === undefined) {
+                        throw new Error('No meta data provided');
+                    }
+
+                    $scope.itemPerPageNumber = $scope.metaData.limit || 0;
+                });
+
+                $scope.$watch('metaData', function (newMetaData) {
+                    if (newMetaData === undefined) {
+                        throw new Error('Meta data undefined');
+                    }
+
+                    if (newMetaData.limit === undefined) {
+                        throw new Error('Meta data invalid: limit undefined');
+                    }
+
+                    if (newMetaData.offset === undefined) {
+                        throw new Error('Meta data invalid: offset undefined');
+                    }
+
+                    if (newMetaData.total === undefined) {
+                        throw new Error('Meta data invalid: total undefined');
+                    }
+
+                    var paginationWidth = $scope.options.paginationWidth || 2;
+                    var limit = newMetaData.limit;
+                    var offset = newMetaData.offset;
+                    var total = newMetaData.total;
+
+                    $scope.pages = [];
+                    if (!(isNaN(limit) || isNaN(offset) || isNaN(total))) {
+                        var numPages = Math.ceil(total / limit);
+                        var startPage = Math.floor(offset / limit) - Math.floor(paginationWidth / 2);
+                        startPage = (startPage < 0) ? 0 : startPage;
+
+                        var currentPageId = Math.floor(offset / limit);
+                        for (var i = startPage; i < Math.min(numPages, startPage + paginationWidth); i++) {
+                            var newPage = {
+                                label: i + 1,
+                                offset: i * limit
+                            };
+                            if (i === currentPageId) {
+                                $scope.currentPage = newPage;
+                            }
+
+                            $scope.pages.push(newPage);
+                        }
+                    }
+                }, true);
+            },
             controller: function ($scope) {
                 $scope.handleButtonClick = function (callback, entry) {
                     if (typeof callback === 'function') {
@@ -74,7 +174,7 @@ angular.module('swAngularAdvancedGrid', [])
                 };
 
                 $scope.setPage = function (page) {
-                    if($scope.metaData === undefined) return;
+                    if ($scope.metaData === undefined) return;
                     if (!$scope.options.hasOwnProperty('listeners')
                         || typeof $scope.options.listeners.onchangepage !== 'function')
                         return;
@@ -83,34 +183,34 @@ angular.module('swAngularAdvancedGrid', [])
                 };
 
                 $scope.setFirstPage = function () {
-                    if($scope.metaData === undefined) return;
+                    if ($scope.metaData === undefined) return;
                     $scope.options.listeners.onchangepage(0, $scope.metaData.limit);
                 };
                 $scope.setPreviousPage = function () {
-                    if($scope.metaData === undefined) return;
+                    if ($scope.metaData === undefined) return;
                     var currentOffset = $scope.currentPage.offset;
                     $scope.options.listeners.onchangepage(currentOffset - $scope.metaData.limit, $scope.metaData.limit);
 
                 };
                 $scope.setNextPage = function () {
-                    if($scope.metaData === undefined) return;
+                    if ($scope.metaData === undefined) return;
                     var currentOffset = $scope.currentPage.offset;
                     $scope.options.listeners.onchangepage(currentOffset + $scope.metaData.limit, $scope.metaData.limit);
 
                 };
                 $scope.setLastPage = function () {
-                    if($scope.metaData === undefined) return;
+                    if ($scope.metaData === undefined) return;
                     var numPages = Math.ceil($scope.metaData.total / $scope.metaData.limit);
                     $scope.options.listeners.onchangepage(numPages * $scope.metaData.limit - $scope.metaData.limit, $scope.metaData.limit);
                 };
 
                 $scope.isOnFirstPage = function () {
-                    if($scope.metaData === undefined) return;
+                    if ($scope.metaData === undefined) return;
                     return $scope.metaData.offset == 0;
                 };
 
                 $scope.isOnLastPage = function () {
-                    if($scope.metaData === undefined) return;
+                    if ($scope.metaData === undefined) return;
 
                     var numPages = Math.ceil($scope.metaData.total / $scope.metaData.limit);
                     return $scope.metaData.offset == numPages * $scope.metaData.limit - $scope.metaData.limit;
@@ -173,104 +273,6 @@ angular.module('swAngularAdvancedGrid', [])
 
                     $scope.options.listeners.onsearch(query);
                 };
-            },
-            link: function ($scope, $element, $attrs) {
-                if (!$scope.hasOwnProperty('options')) {
-                    throw new Error('Options are required!');
-                }
-
-                /**
-                 * Extract list
-                 */
-                if ($scope.ngModel.hasOwnProperty('data')) {
-                    $scope.list = $scope.ngModel.data;
-                } else {
-                    $scope.list = $scope.ngModel;
-                }
-
-                /**
-                 * Extract meta data
-                 */
-                if ($scope.ngModel.hasOwnProperty('metaData')) {
-                    $scope.metaData = $scope.ngModel.metaData;
-                }
-
-                if($scope.list === undefined) {
-                    throw new Error('No data provided');
-                }
-
-                if($scope.metaData === undefined) {
-                    throw new Error('No meta data provided');
-                }
-
-
-                $scope.itemPerPageNumber = $scope.metaData.limit || 0;
-
-                /**
-                 * Prepare fields
-                 */
-                for (var fieldKey in $scope.options.fields) {
-                    $scope.options.fields.sorting = '';
-
-                    if (typeof $scope.options.fields[fieldKey].renderer !== 'function') {
-                        $scope.options.fields[fieldKey].renderer = function (input, row) {
-                            return input;
-                        }
-                    }
-                }
-
-                /**
-                 * Enable eiew-elements
-                 */
-                $scope.showHeadingBar = $scope.options.heading || $scope.showMetaData || $scope.showRefreshButton;
-                $scope.showFooterBar = $scope.options.showPagination || $scope.options.showItemsPerPage || $scope.options.showSearch;
-
-                /**
-                 * Calculate pagination
-                 */
-                $scope.currentPage = undefined;
-                $scope.$watch('metaData', function (newMetaData) {
-                    if(newMetaData === undefined) {
-                        throw new Error('Meta data undefined');
-                    }
-
-                    if(newMetaData.limit === undefined) {
-                        throw new Error('Meta data invalid: limit undefined');
-                    }
-
-                    if(newMetaData.offset === undefined) {
-                        throw new Error('Meta data invalid: offset undefined');
-                    }
-
-                    if(newMetaData.total === undefined) {
-                        throw new Error('Meta data invalid: total undefined');
-                    }
-
-                    var paginationWidth = $scope.options.paginationWidth || 2;
-                    var limit = newMetaData.limit;
-                    var offset = newMetaData.offset;
-                    var total = newMetaData.total;
-
-                    $scope.pages = [];
-                    if (!(isNaN(limit) || isNaN(offset) || isNaN(total))) {
-                        var numPages = Math.ceil(total / limit);
-                        var startPage = Math.floor(offset / limit) - Math.floor(paginationWidth / 2);
-                        startPage = (startPage < 0) ? 0 : startPage;
-
-                        var currentPageId = Math.floor(offset / limit);
-                        for (var i = startPage; i < Math.min(numPages, startPage + paginationWidth); i++) {
-                            var newPage = {
-                                label: i + 1,
-                                offset: i * limit
-                            };
-                            if (i === currentPageId) {
-                                $scope.currentPage = newPage;
-                            }
-
-                            $scope.pages.push(newPage);
-                        }
-                    }
-                }, true);
             }
         };
     });
