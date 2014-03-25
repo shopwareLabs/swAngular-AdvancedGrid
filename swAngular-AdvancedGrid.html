@@ -15,9 +15,18 @@
             <thead>
             <tr>
                 <th ng-repeat="field in options.fields" width="{{field.weight}}%">
-                    <i class="glyphicon glyphicon-sort-by-alphabet" ng-show="field.order=='asc'"></i>
-                    <i class="glyphicon glyphicon-sort-by-alphabet-alt" ng-show="field.order=='desc'"></i>
-                    <a ng-click="changeOrder(field)">{{field.label}}:</a>
+                    <span ng-show="field.order=='asc'">
+                        <i class="glyphicon glyphicon-sort-by-alphabet"></i>
+                        <a ng-click="changeOrder(field, field.orderByValue, 'desc')">{{field.label}}:</a>
+                    </span>
+                    <span ng-show="field.order=='desc'">
+                        <i class="glyphicon glyphicon-sort-by-alphabet-alt"></i>
+                        <a ng-click="changeOrder(field, field.orderByValue, 'asc')">{{field.label}}:</a>
+                    </span>
+                    <span ng-hide="field.order.length>0">
+                        <a ng-click="changeOrder(field, field.orderByValue, 'desc')">{{field.label}}:</a>
+                    </span>
+
                 </th>
             </tr>
             </thead>
@@ -25,7 +34,7 @@
             <tr ng-repeat="entry in list" ng-dblclick="enableLiveEditing(entry)">
                 <td ng-repeat="field in options.fields" >
                     <div ng-if="!entry.liveEditingEnabled || !field.liveEditable">
-                        {{field.renderer(entry[field.column], entry)}}
+                        {{field.renderer(entry[field.column], entry, field.column)}}
                     </div>
                     <div ng-if="entry.liveEditingEnabled && field.liveEditable">
                         <input type="{{field.liveEditType || guessLiveEditingType(entry[field.column])}}" ng-model="entry[field.column]"/>

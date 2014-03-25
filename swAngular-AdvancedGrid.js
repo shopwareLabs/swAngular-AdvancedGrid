@@ -1,5 +1,6 @@
 var scripts = document.getElementsByTagName("script");
-var currentScriptPath = scripts[scripts.length - 1].src;
+var pathMap = pathMap || {};
+pathMap['swAngular-AdvancedGrid'] = scripts[scripts.length - 1].src;
 
 angular.module('swAngularAdvancedGrid', [])
     .directive('swAngularAdvancedGrid', function () {
@@ -12,7 +13,7 @@ angular.module('swAngularAdvancedGrid', [])
                 metaData: '=?swMetaData',
                 options: '=swOptions'
             },
-            templateUrl: currentScriptPath.substring(0, currentScriptPath.lastIndexOf('/') + 1) + "swAngular-AdvancedGrid.html",
+            templateUrl: pathMap['swAngular-AdvancedGrid'].substring(0, pathMap['swAngular-AdvancedGrid'].lastIndexOf('/') + 1) + "swAngular-AdvancedGrid.html",
             link: function ($scope) {
                 if (!$scope.hasOwnProperty('options')) {
                     throw new Error('Options are required!');
@@ -25,7 +26,8 @@ angular.module('swAngularAdvancedGrid', [])
                     $scope.options.fields.sorting = '';
 
                     if (typeof $scope.options.fields[fieldKey].renderer !== 'function') {
-                        $scope.options.fields[fieldKey].renderer = function (input, row) {
+                        $scope.options.fields[fieldKey].orderByValue = $scope.options.fields[fieldKey].column;
+                        $scope.options.fields[fieldKey].renderer = function (input, row, column) {
                             return input;
                         }
                     }
@@ -233,7 +235,7 @@ angular.module('swAngularAdvancedGrid', [])
                  * On Order change
                  * @param field
                  */
-                $scope.changeOrder = function (field) {
+                $scope.changeOrder = function (field, orderBy, orderSequence) {
                     if (!$scope.options.hasOwnProperty('listeners')
                         || typeof $scope.options.listeners.onchangeorder !== 'function') return;
 
@@ -243,9 +245,9 @@ angular.module('swAngularAdvancedGrid', [])
                         $scope.options.fields[fieldKey].order = '';
                     }
 
-                    field.order = (field.order != 'desc') ? 'desc' : 'asc';
+                    field.order = orderSequence;
 
-                    $scope.options.listeners.onchangeorder(field.column, field.order);
+                    $scope.options.listeners.onchangeorder(orderBy, orderSequence);
                 };
 
                 /**
