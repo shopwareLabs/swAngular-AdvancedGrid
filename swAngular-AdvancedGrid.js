@@ -18,7 +18,7 @@ angular.module('swAngularAdvancedGrid', [])
                 '                <span ng-show="options.showMetaData">{{options.snippets.showingItems}} {{metaData.offset}} - {{(metaData.offset > metaData.total) ? (metaData.offset + metaData.total) : (metaData.offset + metaData.limit)}} {{options.snippets.of || \'/\'}} {{metaData.total}}</span>',
                 '            </div>',
                 '            <div class="col-md-1">',
-                '                <i class="glyphicon glyphicon-refresh" ng-show="options.showRefreshButton" ng-click="refresh()"></i>',
+                '                <a class="glyphicon glyphicon-refresh" ng-show="options.showRefreshButton" ng-click="refresh()"></a>',
                 '            </div>',
                 '        </div>',
                 '    </div>',
