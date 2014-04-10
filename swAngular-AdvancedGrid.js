@@ -13,7 +13,7 @@ angular.module('swAngularAdvancedGrid', [])
                 '<div class="panel panel-default">',
                 '    <div class="panel-heading" ng-show="showHeadingBar">',
                 '        <div class="row">',
-                '            <div class="col-md-8">{{options.heading}}</div>',
+                '            <div class="col-md-8"><h3 class="panel-title">{{options.heading}}</h3></div>',
                 '            <div class="col-md-3">',
                 '                <span ng-show="options.showMetaData">{{options.snippets.showingItems}} {{metaData.offset}} - {{(metaData.offset > metaData.total) ? (metaData.offset + metaData.total) : (metaData.offset + metaData.limit)}} {{options.snippets.of || \'/\'}} {{metaData.total}}</span>',
                 '            </div>',
