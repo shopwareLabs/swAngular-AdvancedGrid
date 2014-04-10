@@ -47,7 +47,7 @@ angular.module('swAngularAdvancedGrid', [])
                 '                        <span class="glyphicon glyphicon-info-sign"></span> <span>{{options.emptyGridText || \'No data available\'}}</span>',
                 '                    </td>',
                 '                </tr>',
-                '                <tr ng-repeat="entry in list" ng-dblclick="enableLiveEditing(entry)">',
+                '                <tr ng-repeat="entry in list" ng-click="onRowClick(entry)" ng-dblclick="enableLiveEditing(entry)">',
                 '                    <td ng-repeat="field in options.fields" >',
                 '                        <div ng-if="!entry.liveEditingEnabled || !field.liveEditable">',
                 '        {{field.renderer(entry[field.column], entry, field.column)}}',
@@ -262,6 +262,14 @@ angular.module('swAngularAdvancedGrid', [])
                             entry[key] = entry.$$swag_secure[key];
                         }
                     }
+                };
+
+                $scope.onRowClick = function(clickedEntry) {
+                    if (!$scope.options.hasOwnProperty('listeners')
+                        || typeof $scope.options.listeners.onrowclick !== 'function')
+                        return;
+
+                    $scope.options.listeners.onrowclick(clickedEntry);
                 };
 
                 $scope.enableLiveEditing = function (selectedEntry) {
