@@ -59,15 +59,16 @@ angular.module('swAngularAdvancedGrid', [])
                 '                    <td ng-repeat="button in options.buttons">',
                 '                        <div ng-if="!button.button">',
                 '                            <div ng-if="button.glyphicon.length>0">',
-                '                                <a ng-click="handleButtonClick(button.onclick, entry)">',
+                '                                <a ng-click="handleButtonClick(button.onclick, entry)" ng-hide="button.isDisabled(entry)">',
                 '                                    <i class="glyphicon glyphicon-{{button.glyphicon}}" title="{{button.label}}"></i>',
                 '                                </a>',
+                '                                <i ng-show="button.isDisabled(entry)" class="glyphicon glyphicon-{{button.glyphicon}}" title="{{button.label}}"></i>',
                 '                            </div>',
                 '                            <div ng-if="button.iconPath.length>0">',
                 '                                <img ng-src="button.iconPath" alt="{{button.label}}"/>',
                 '                            </div>',
                 '                        </div>',
-                '                        <button ng-if="button.button" ng-click="handleButtonClick(button.onclick, entry)">',
+                '                        <button ng-if="button.button" ng-click="handleButtonClick(button.onclick, entry)" ng-disabled="button.isDisabled(entry)">',
                 '                            <i ng-if="button.glyphicon.length>0" class="glyphicon glyphicon-{{button.glyphicon}}"',
                 '                            title="{{button.label}}"></i>',
                 '                            <img ng-if="button.iconPath.length>0" ng-src="button.iconPath" alt="{{button.label}}"/>',
@@ -137,12 +138,33 @@ angular.module('swAngularAdvancedGrid', [])
                  * Prepare fields
                  */
                 for (var fieldKey in $scope.options.fields) {
+                    if(!$scope.options.fields.hasOwnProperty(fieldKey)) continue;
                     $scope.options.fields.sorting = '';
 
                     if (typeof $scope.options.fields[fieldKey].renderer !== 'function') {
                         $scope.options.fields[fieldKey].orderByValue = $scope.options.fields[fieldKey].column;
                         $scope.options.fields[fieldKey].renderer = function (input, row, column) {
                             return input;
+                        }
+                    }
+                }
+
+                /**
+                 * Prepare buttons
+                 */
+                for(var buttonKey in $scope.options.buttons) {
+                    if(!$scope.options.buttons.hasOwnProperty(buttonKey)) continue;
+
+                    if(typeof $scope.options.buttons[buttonKey].isDisabled !== 'function') {
+                        console.log('jeah');
+                        $scope.options.buttons[buttonKey].isDisabled = function() {
+                            return false;
+                        }
+                    }
+                    if(typeof $scope.options.buttons[buttonKey].isDisabled() !== 'boolean') {
+                        console.log('hell');
+                        $scope.options.buttons[buttonKey].isDisabled = function() {
+                            return false;
                         }
                     }
                 }
@@ -342,7 +364,7 @@ angular.module('swAngularAdvancedGrid', [])
 
 
                 /**
-                 * On Refresh
+                 *
                  */
                 $scope.refresh = function () {
                     if (!$scope.options.hasOwnProperty('listeners')
@@ -354,8 +376,10 @@ angular.module('swAngularAdvancedGrid', [])
 
 
                 /**
-                 * On Order change
+                 *
                  * @param field
+                 * @param orderBy
+                 * @param orderSequence
                  */
                 $scope.changeOrder = function (field, orderBy, orderSequence) {
                     if (!$scope.options.hasOwnProperty('listeners')
@@ -373,8 +397,8 @@ angular.module('swAngularAdvancedGrid', [])
                 };
 
                 /**
-                 * On Order change
-                 * @param field
+                 *
+                 * @param number
                  */
                 $scope.changeItemsPerPage = function (number) {
                     if (!$scope.options.hasOwnProperty('listeners')
@@ -388,8 +412,8 @@ angular.module('swAngularAdvancedGrid', [])
                 };
 
                 /**
-                 * On Order change
-                 * @param field
+                 *
+                 * @param query
                  */
                 $scope.search = function (query) {
                     if (!$scope.options.hasOwnProperty('listeners')
