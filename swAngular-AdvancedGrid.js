@@ -359,7 +359,8 @@ angular.module('swAngularAdvancedGrid', [])
                     if ($scope.metaData === undefined) return;
 
                     var numPages = Math.ceil($scope.metaData.total / $scope.metaData.limit);
-                    return $scope.metaData.offset == numPages * $scope.metaData.limit - $scope.metaData.limit;
+                    return $scope.metaData.offset == numPages * $scope.metaData.limit - $scope.metaData.limit
+                        || $scope.metaData.offset == 0;
                 };
 
 
