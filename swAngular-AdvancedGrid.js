@@ -49,9 +49,10 @@ angular.module('swAngularAdvancedGrid', [])
                 '                </tr>',
                 '                <tr ng-repeat="entry in list" ng-click="onRowClick(entry)" ng-dblclick="enableLiveEditing(entry)">',
                 '                    <td ng-repeat="field in options.fields" >',
-                '                        <div ng-if="!entry.liveEditingEnabled || !field.liveEditable">',
+                '                        <div ng-if="(!entry.liveEditingEnabled || !field.liveEditable) && !field.sanitize">',
                 '        {{field.renderer(entry[field.column], entry, field.column)}}',
                 '                        </div>',
+                '                        <div ng-if="(!entry.liveEditingEnabled || !field.liveEditable) && field.sanitize" ng-bind-html="field.renderer(entry[field.column], entry, field.column)">',
                 '                        <div ng-if="entry.liveEditingEnabled && field.liveEditable">',
                 '                            <input type="{{field.liveEditType || guessLiveEditingType(entry[field.column])}}" ng-model="entry[field.column]"/>',
                 '                        </div>',
@@ -97,8 +98,8 @@ angular.module('swAngularAdvancedGrid', [])
                 '                        <a ng-show="!isOnFirstPage()"class="glyphicon glyphicon-backward" ng-click="setPreviousPage()"> </a>',
                 '                    </li>',
                 '                    <li data-ng-repeat="page in pages">',
-                '                        <span ng-show="currentPage.label == page.label">{{page.label}}</span>',
                 '                        <a ng-show="currentPage.label != page.label" ng-click="setPage(page)">{{page.label}}</a>',
+                '                        <span ng-show="currentPage.label == page.label">{{page.label}}</span>',
                 '                    </li>',
                 '                    <li>',
                 '                        <span ng-show="isOnLastPage()" class="glyphicon glyphicon-fast-forward"> </span>',
@@ -156,7 +157,6 @@ angular.module('swAngularAdvancedGrid', [])
                     if(!$scope.options.buttons.hasOwnProperty(buttonKey)) continue;
 
                     if(typeof $scope.options.buttons[buttonKey].isDisabled !== 'function') {
-                        console.log('jeah');
                         $scope.options.buttons[buttonKey].isDisabled = function() {
                             return false;
                         }
@@ -359,6 +359,7 @@ angular.module('swAngularAdvancedGrid', [])
                     if ($scope.metaData === undefined) return;
 
                     var numPages = Math.ceil($scope.metaData.total / $scope.metaData.limit);
+
                     return $scope.metaData.offset == numPages * $scope.metaData.limit - $scope.metaData.limit
                         || $scope.metaData.offset == 0;
                 };
